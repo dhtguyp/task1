@@ -6,5 +6,5 @@ int
 main(int argc, char *argv[]) //task2
 {
     printf("hello world\n");
-    exit(0);
+    exit(0,"");
 }

@@ -8,11 +8,15 @@
 #include "cfs_stat.h"
 
 uint64
-sys_exit(void)
+sys_exit()
 {
   int n;
+  //NEW
+  printf("hello");
+  char exit_msg[32];
   argint(0, &n);
-  exit(n);
+  argstr(1, exit_msg, sizeof(exit_msg));
+  exit(n, exit_msg);
   return 0;  // not reached
 }
 
@@ -32,8 +36,11 @@ uint64
 sys_wait(void)
 {
   uint64 p;
+  uint64 exit_msg;
+  //NEW
   argaddr(0, &p);
-  return wait(p);
+  argaddr(1, &exit_msg);
+  return wait(p, exit_msg);
 }
 
 uint64
