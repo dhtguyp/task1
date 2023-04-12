@@ -117,3 +117,4 @@ struct proc {
 };
 
 void increase_proc_ticks(void); //task6 - used in trap.c in function devintr
+void set_policy(uint64); //task7

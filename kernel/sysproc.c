@@ -134,3 +134,14 @@ sys_get_cfs_stat(void){ //task6
   copyout(p->pagetable, addr+24, (char *)&p->retime, sizeof(long long));
   return 0;
 }
+
+uint64
+sys_set_policy(void){ //task7
+  int policy;
+  argint(0, &policy);
+  if(policy < 0 || policy >= 3){
+      return -1;
+  }
+  set_policy(policy);
+  return 0;
+}

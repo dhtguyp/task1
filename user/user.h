@@ -28,6 +28,7 @@ int memsize(void); //Added for task2
 int set_ps_priority(int); //Added for task5
 int set_cfs_priority(int); //Added for task6
 int get_cfs_stat(struct cfs_stat*); //Added for task6
+int set_policy(int); //Added for task7
 
 // ulib.c
 int stat(const char*, struct stat*);

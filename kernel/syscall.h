@@ -25,3 +25,4 @@
 #define SYS_set_ps_priority 23 //task5
 #define SYS_set_cfs_priority 24 //task6
 #define SYS_get_cfs_stat 25 //task6
+#define SYS_set_policy 26 //task7

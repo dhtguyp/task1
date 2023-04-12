@@ -15,6 +15,9 @@ struct proc *initproc;
 int nextpid = 1;
 struct spinlock pid_lock;
 
+int sched_policy = 0; //task7
+struct spinlock shed_lock;
+
 extern void forkret(void);
 static void freeproc(struct proc *p);
 
@@ -51,6 +54,9 @@ procinit(void)
   
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
+
+  initlock(&shed_lock, "sched"); //task7
+
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
       p->state = UNUSED;
@@ -448,7 +454,7 @@ wait(uint64 addr)
   }
 }
 
-//Oirignal scheduler, unused in tasks 5-6 - ctrl shift c for uncommenting the appropriate scheduler
+// Oirignal scheduler
 
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -457,36 +463,34 @@ wait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-/* void
-scheduler(void)
+void
+scheduler_0(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
-  
-  c->proc = 0;
-  for(;;){
-    // Avoid deadlock by ensuring that devices can interrupt.
-    intr_on();
 
-    for(p = proc; p < &proc[NPROC]; p++) {
-      acquire(&p->lock);
-      if(p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+  // Avoid deadlock by ensuring that devices can interrupt.
+  intr_on();
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
+  for(p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+    if(p->state == RUNNABLE) {
+      // Switch to chosen process.  It is the process's job
+      // to release its lock and then reacquire it
+      // before jumping back to us.
+      p->state = RUNNING;
+      c->proc = p;
+      swtch(&c->context, &p->context);
 
-        c->proc = 0;
-      }
-      release(&p->lock);
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+
+      c->proc = 0;
     }
+    release(&p->lock);
   }
-} */
+}
+
 
 //task5 - returns the minimum accumulator value of a runnable/running process.
 //min_run_procs argument is for the maximum amount of running/runnable processes for which the function will return 0.
@@ -507,42 +511,38 @@ long long get_min_accumulator(int min_run_procs){
 }
 
 
-/* // task5 - scheduler
+// task5 - scheduler
 void
-scheduler(void)
+scheduler_1(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
   long long min_acc;  //In each iteration will hold the minimum accumulator of a runnable process.
   
-  c->proc = 0;
-  for(;;){
-    // Avoid deadlock by ensuring that devices can interrupt.
-    intr_on();
-    p = proc;
-    min_acc = get_min_accumulator(1); //minimum accumulator of running/runnable processes.
+  intr_on();
+  p = proc;
+  min_acc = get_min_accumulator(1); //minimum accumulator of running/runnable processes.
 
-    for(p = proc; p < &proc[NPROC]; p++) { //Pass through all processes again, find runnable with minimum accumulator
-      acquire(&p->lock);
-      if(p->state == RUNNABLE && (min_acc == 0 || p->accumulator == min_acc) ){//if minimum accumulator is 0 then there is only 1 runnable process.
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
-        if(min_acc == 0) p->accumulator = 0; //Only runnable/running process, in that case reset the accumulator.
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
+  for(p = proc; p < &proc[NPROC]; p++) { //Pass through all processes again, find runnable with minimum accumulator
+    acquire(&p->lock);
+    if(p->state == RUNNABLE && (min_acc == 0 || p->accumulator == min_acc) ){//if minimum accumulator is 0 then there is only 1 runnable process.
+      // Switch to chosen process.  It is the process's job
+      // to release its lock and then reacquire it
+      // before jumping back to us.
+      if(min_acc == 0) p->accumulator = 0; //Only runnable/running process, in that case reset the accumulator.
+      p->state = RUNNING;
+      c->proc = p;
+      swtch(&c->context, &p->context);
 
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        p->accumulator += p->ps_priority; // Finished time quantum, add to the accumulator.
-        c->proc = 0;
-      }
-      release(&p->lock);
+      // Process is done running for now.
+      // It should have changed its p->state before coming back.
+      p->accumulator += p->ps_priority; // Finished time quantum, add to the accumulator.
+      c->proc = 0;
     }
+    release(&p->lock);
+  }
 
-  } // end for(;;)
-} */
+}
 
 //task6 - Will increase clock ticks for every process depending on it's current state.
 void increase_proc_ticks(){
@@ -570,62 +570,84 @@ void increase_proc_ticks(){
 
 // task6 scheduler
 void
-scheduler(void)
+scheduler_2(void)
 {
   struct proc *p;
   struct cpu *c = mycpu();
   int min_vrun;
   int vrun;
   int ind, i;
+  intr_on();
+    
+  min_vrun = __INT32_MAX__;
+  ind = -1;
+  i = 0;
+  p = proc;
+  for(p = proc; p < &proc[NPROC]; p++) {
+    if(p->state == RUNNABLE) {
+        if(p->runtime == 0 && p->sleeptime == 0 && p->retime == 0){
+          ind = i;
+          break;
+        }
+        vrun = (int) ((75 + 25*p->ps_priority) * (p->runtime/(p->runtime + p->sleeptime + p->retime)));
+
+        if(vrun == 0){ //found minimum vruntime value, no need to go further in the loop.
+          ind = i;
+          break;
+        }
+        else if(vrun < min_vrun){
+          ind = i;
+          min_vrun = vrun;
+        }
+    }
+    ++i;
+  }
   
+  if(ind != -1){
+      p = proc + ind;
+      acquire(&p->lock);
+      if(p->state == RUNNABLE){ //might've changed state due to other cpu taking the process.
+        // Switch to chosen process.  It is the process's job
+        // to release its lock and then reacquire it
+        // before jumping back to us.
+        p->state = RUNNING;
+        c->proc = p;
+        swtch(&c->context, &p->context);
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+
+        c->proc = 0;
+      }
+      release(&p->lock);
+  }
+
+}
+
+// task7 - main scheduler, in each cycle will go for the appropriate scheduler, depending on sched_type value.
+void scheduler(void){
+  struct cpu *c = mycpu();
   c->proc = 0;
   for(;;){
-    // Avoid deadlock by ensuring that devices can interrupt.
-    intr_on();
-
-    min_vrun = __INT32_MAX__;
-    ind = -1;
-    i = 0;
-    p = proc;
-    for(p = proc; p < &proc[NPROC]; p++) {
-      if(p->state == RUNNABLE) {
-          if(p->runtime == 0 && p->sleeptime == 0 && p->retime == 0){
-            ind = i;
-            break;
-          }
-          vrun = (int) ((75 + 25*p->ps_priority) * (p->runtime/(p->runtime + p->sleeptime + p->retime)));
-
-          if(vrun == 0){ //found minimum vruntime value, no need to go further in the loop.
-            ind = i;
-            break;
-          }
-          else if(vrun < min_vrun){
-            ind = i;
-            min_vrun = vrun;
-          }
-      }
-      ++i;
+    switch(sched_policy){
+        case(0):
+          scheduler_0(); //original
+          break;
+        case(1):
+          scheduler_1(); //task5
+          break;
+        case(2):
+          scheduler_2(); //task6
+          break;
+          default:
+          break;
     }
-    
-    if(ind != -1){
-        p = proc + ind;
-        acquire(&p->lock);
-        if(p->state == RUNNABLE){ //might've changed state due to other cpu taking the process.
-          // Switch to chosen process.  It is the process's job
-          // to release its lock and then reacquire it
-          // before jumping back to us.
-          p->state = RUNNING;
-          c->proc = p;
-          swtch(&c->context, &p->context);
-          // Process is done running for now.
-          // It should have changed its p->state before coming back.
-
-          c->proc = 0;
-        }
-        release(&p->lock);
-    }
-
-  }//end infinite for loop
+  }
+}
+//task7 - will be called from the system call from sysproc, val E {0, 1, 2}.
+void set_policy(uint64 val){
+    acquire(&shed_lock);
+    sched_policy = val;
+    release(&shed_lock);
 }
 
 // Switch to scheduler.  Must hold only p->lock
