@@ -36,7 +36,7 @@ main(int argc, char *argv[]) //task6, print order: p2 -> p1 -> pmain
         else{ //child process one, waits for process two to finish before printing statistics
             set_cfs_priority(1);
             iterations();
-            wait(&p2);
+            wait(&p2,"");
             statistics_print();
         }
     }
@@ -44,10 +44,10 @@ main(int argc, char *argv[]) //task6, print order: p2 -> p1 -> pmain
     else{ //main process, waits for process one to finish before printing statistics
         set_cfs_priority(2);
         iterations();
-        wait(&p1);
+        wait(&p1,"");
         statistics_print();
         printf("cfs done.\n");
     }
 
-    exit(0);
+    exit(0, "");
 }

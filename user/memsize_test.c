@@ -16,5 +16,5 @@ main(int argc, char *argv[]){
     free(ptr);
     memory = memsize();
     printf("after free the process hold %d bytes.\n", memory);
-    exit(0);
+    exit(0,"");
 }

@@ -91,6 +91,7 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
+  char exit_msg[32];//task 3  
 
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process
@@ -117,3 +118,4 @@ struct proc {
 };
 
 void increase_proc_ticks(void); //task6 - used in trap.c in function devintr
+void set_policy(uint64); //task7

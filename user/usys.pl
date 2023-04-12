@@ -41,3 +41,4 @@ entry("memsize"); #task2
 entry("set_ps_priority"); #task5
 entry("set_cfs_priority"); #task6
 entry("get_cfs_stat"); #task6
+entry("set_policy") #task7

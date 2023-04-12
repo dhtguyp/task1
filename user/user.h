@@ -3,8 +3,8 @@ struct cfs_stat; //Added for task6
 
 // system calls
 int fork(void);
-int exit(int) __attribute__((noreturn));
-int wait(int*);
+int exit(int, char*) __attribute__((noreturn));
+int wait(int*, char*);
 int pipe(int*);
 int write(int, const void*, int);
 int read(int, void*, int);
@@ -28,6 +28,7 @@ int memsize(void); //Added for task2
 int set_ps_priority(int); //Added for task5
 int set_cfs_priority(int); //Added for task6
 int get_cfs_stat(struct cfs_stat*); //Added for task6
+int set_policy(int); //Added for task7
 
 // ulib.c
 int stat(const char*, struct stat*);

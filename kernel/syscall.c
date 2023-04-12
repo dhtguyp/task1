@@ -105,6 +105,7 @@ extern uint64 sys_memsize(void); //task2
 extern uint64 sys_set_ps_priority(void); //task5
 extern uint64 sys_set_cfs_priority(void); //task6
 extern uint64 sys_get_cfs_stat(void); //task6
+extern uint64 sys_set_policy(void); //task7
 
 
 // An array mapping syscall numbers from syscall.h
@@ -136,6 +137,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_set_ps_priority] sys_set_ps_priority, //task5
 [SYS_set_cfs_priority] sys_set_cfs_priority, //task6
 [SYS_get_cfs_stat] sys_get_cfs_stat, //task6
+[SYS_set_policy] sys_set_policy, //task7
 };
 
 void
