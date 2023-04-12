@@ -8,7 +8,7 @@ void iterations(){
     for (int i = 0; i < 1000000; i++)
     {
         if(i % 100000 == 0 && i != 0)
-            sleep(1);
+            sleep(2);
     }
 }
 
@@ -23,7 +23,7 @@ void statistics_print(){
 
 
 int
-main(int argc, char *argv[]) //task6
+main(int argc, char *argv[]) //task6, print order: p2 -> p1 -> pmain
 {
     int p1, p2;
 
@@ -33,7 +33,7 @@ main(int argc, char *argv[]) //task6
             iterations();
             statistics_print();
         }
-        else{ //child process one
+        else{ //child process one, waits for process two to finish before printing statistics
             set_cfs_priority(1);
             iterations();
             wait(&p2);
@@ -41,7 +41,7 @@ main(int argc, char *argv[]) //task6
         }
     }
 
-    else{ //main process
+    else{ //main process, waits for process one to finish before printing statistics
         set_cfs_priority(2);
         iterations();
         wait(&p1);

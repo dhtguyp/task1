@@ -115,3 +115,5 @@ struct proc {
   long long sleeptime;
   long long retime;
 };
+
+void increase_proc_ticks(void); //task6 - used in trap.c in function devintr

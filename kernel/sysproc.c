@@ -122,10 +122,15 @@ sys_set_cfs_priority(void) //task6
   return 0;
 
 }
+
 uint64
-sys_get_cfs_stat(void){
+sys_get_cfs_stat(void){ //task6
   struct proc * p = myproc();
   uint64 addr;
   argaddr(0, &addr);
-  return copyout(p->pagetable, addr, (char *)&p->cfs_priority, (uint64)sizeof(struct cfs_stat));
+  copyout(p->pagetable, addr, (char *)&p->cfs_priority, sizeof(int));
+  copyout(p->pagetable, addr+8, (char *)&p->runtime, sizeof(long long));
+  copyout(p->pagetable, addr+16, (char *)&p->sleeptime, sizeof(long long));
+  copyout(p->pagetable, addr+24, (char *)&p->retime, sizeof(long long));
+  return 0;
 }
