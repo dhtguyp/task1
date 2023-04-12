@@ -4,8 +4,7 @@
 int
 main(int argc, char *argv[])
 {
-  char * msg = "Goodbye World xv6";
-  printf("hi");
+  char * msg = "Goodbye World xv6\n";
   exit(0, msg);
 }
 

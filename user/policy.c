@@ -7,15 +7,13 @@ main(int argc, char *argv[]) //task2
 {
     if(argc == 1){
         
-        printf("No policy value given.\n");
-        exit(1);
+        exit(1,"No policy value given.\n");
     }
     int res = set_policy((uint)atoi(argv[1]));
     if(res == 0){
-        printf("Successfully change policy value.\n");
-        exit(0);
+        exit(0, "Successfuy change policy value.\n");
     }
 
-    printf("Error, could not change policy value.\n");
-    exit(1);
+    exit(1,"Error, could not change policy value.\n");
+
 }

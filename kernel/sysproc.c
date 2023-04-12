@@ -12,7 +12,6 @@ sys_exit()
 {
   int n;
   //NEW
-  printf("hello");
   char exit_msg[32];
   argint(0, &n);
   argstr(1, exit_msg, sizeof(exit_msg));
