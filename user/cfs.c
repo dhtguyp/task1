@@ -25,27 +25,35 @@ void statistics_print(){
 int
 main(int argc, char *argv[]) //task6, print order: p2 -> p1 -> pmain
 {
-    int p1, p2;
+    int p1, p2, p3;
 
     if( (p1 = fork()) == 0){ 
-        if( (p2 = fork()) == 0){ //child process two
-            set_cfs_priority(0);
+        if( (p2 = fork()) == 0){ //child process three
+            if((p3 = fork()) == 0){
+                set_cfs_priority(0);
+                iterations();
+                statistics_print();
+                exit(0, "");
+            }
+            else{ //child process two, waits for process three to finish before printing statistics
+            set_cfs_priority(1);
             iterations();
+            wait(&p3,"");
             statistics_print();
+            exit(0, "");
+            }
         }
         else{ //child process one, waits for process two to finish before printing statistics
-            set_cfs_priority(1);
+            set_cfs_priority(2);
             iterations();
             wait(&p2,"");
             statistics_print();
+            exit(0, "");
         }
     }
 
-    else{ //main process, waits for process one to finish before printing statistics
-        set_cfs_priority(2);
-        iterations();
+    else{ 
         wait(&p1,"");
-        statistics_print();
         printf("cfs done.\n");
     }
 

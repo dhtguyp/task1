@@ -5,5 +5,6 @@
 int
 main(int argc, char *argv[]) //task2
 {
-    exit(0,"hello world\n");
+    printf("hello world!\n");
+    exit(0,"");
 }

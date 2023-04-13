@@ -11,7 +11,7 @@ main(int argc, char *argv[]) //task2
     }
     int res = set_policy((uint)atoi(argv[1]));
     if(res == 0){
-        exit(0, "Successfuy change policy value.\n");
+        exit(0, "Successfully change policy value.\n");
     }
 
     exit(1,"Error, could not change policy value.\n");
